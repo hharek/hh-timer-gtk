@@ -1,0 +1,2 @@
+https://glade.gnome.org/
+https://www.gtk.org/docs/

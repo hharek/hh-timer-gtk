@@ -1,3 +1,2 @@
-- CMake GTK+
 - Отобразить home.glade
 - Понять для чего GtkBuilder
