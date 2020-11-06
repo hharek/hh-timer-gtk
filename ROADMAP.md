@@ -1,2 +1,3 @@
 - Отобразить home.glade
 - Понять для чего GtkBuilder
+- Разобраться с gtkmm
