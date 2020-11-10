@@ -1,4 +1,0 @@
-https://glade.gnome.org/
-https://www.gtk.org/docs/
-https://developer.gnome.org/gtkmm-tutorial/
-https://www.ibm.com/developerworks/ru/library/l-GTKbuilder/index.html
