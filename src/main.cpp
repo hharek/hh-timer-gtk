@@ -1,15 +1,13 @@
-#include <gtk/gtk.h>
+#include <gtkmm.h>
 
 int main (int argc, char **argv)
 {
-    gtk_init (&argc, &argv);
+    auto app = Gtk::Application::create(argc, argv, "ru.hharek.hh-timer");
 
-    GtkBuilder * builder = gtk_builder_new_from_file("../glade/home.glade");
-    GtkWidget * window = GTK_WIDGET(gtk_builder_get_object(builder, "home"));
+    Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create_from_file("../glade/home.glade");
 
-    g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
-    gtk_widget_show_all (window);
+    Gtk::Window* window = nullptr;
+    builder->get_widget("home", window);
 
-    gtk_main ();
-    return 0;
+    return app->run(*window);
 }
