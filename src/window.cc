@@ -1,15 +1,16 @@
 #include <gtkmm.h>
-#include <iostream>
+#include <thread>
 
 #include "window.h"
-
+#include "worker.h"
 
 /**
  * Конструктор
  */
 Window::Window (BaseObjectType* widget, Glib::RefPtr<Gtk::Builder> & builder) :
     Gtk::Window(widget),
-    builder(builder)
+    builder(builder),
+    signal_time_change()
 {
     /* Окно */
     builder->get_widget("lbl-time", this->lbl_time);
@@ -25,7 +26,18 @@ Window::Window (BaseObjectType* widget, Glib::RefPtr<Gtk::Builder> & builder) :
     builder->get_widget("btn-resume", this->btn_resume);
     this->btn_resume->signal_clicked().connect(sigc::mem_fun(*this, &Window::btn_resume_click));
 
+    /* Показать кнопки */
     this->show_button();
+
+    /* Подписываемся на сигнал «signal_time_change» */
+    this->signal_time_change.connect(sigc::mem_fun(*this, &Window::slot_time_change));
+
+    /* Запускаем воркер */
+    this->thread = new std::thread([this]
+    {
+       auto worker = new Worker();
+       worker->run(this);
+    });
 }
 
 /**
@@ -72,7 +84,7 @@ void Window::btn_resume_click()
 /**
  * Показать кнопки
  */
-void Window::show_button ()
+void Window::show_button () const
 {
     /* Удаляем старые */
     for (Gtk::Widget * child : this->box_button->get_children())
@@ -96,4 +108,12 @@ void Window::show_button ()
             break;
     }
 
+}
+
+/**
+ * Сменить время на таймере
+ */
+void Window::slot_time_change () const
+{
+    this->lbl_time->set_label("00:33:00");
 }
