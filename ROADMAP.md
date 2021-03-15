@@ -4,3 +4,9 @@
     - Старт
     - Пауза + Отмена
     - Продолжить + Отмена
+- Разобраться с RAII
+    - using(){}
+    - unique_ptr
+- Разобраться с mutex 
+    - std::mutex
+    - std::lock_guard
