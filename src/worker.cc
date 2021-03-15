@@ -11,6 +11,13 @@ using namespace std::chrono;
  */
 void Worker::run (Window * window)
 {
-    std::this_thread::sleep_for(3s);
-    window->signal_time_change.emit();
+    for (int i = 0; i < 3; i++)
+    {
+        std::this_thread::sleep_for(1s);
+        {
+            std::lock_guard<std::mutex> lock(this->mutex);
+            window->second += 1;
+        }
+        window->signal_time_change.emit();
+    }
 }

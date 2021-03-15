@@ -14,7 +14,9 @@ public:
     ~Window() override;                                                         /* Деструктор */
 
     Glib::RefPtr<Gtk::Builder> builder;  /* Ссылка на сборщик */
-    Gtk::Label * lbl_time = nullptr;  /* Время на таймере */
+    Gtk::Label * lbl_time = nullptr;  /* Панель. Время на таймере */
+
+    int second = 0;  /* Текущее время на таймере в секундах */
 
     /* Кнопки */
     Gtk::Box * box_button = nullptr;  /* Коробка с кнопками */

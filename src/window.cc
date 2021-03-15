@@ -115,5 +115,6 @@ void Window::show_button () const
  */
 void Window::slot_time_change () const
 {
-    this->lbl_time->set_label("00:33:00");
+    Glib::ustring str = Glib::ustring::format(this->second);
+    this->lbl_time->set_label(str);
 }
