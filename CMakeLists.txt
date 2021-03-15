@@ -11,5 +11,5 @@ link_directories(${GTKMM_LIBRARY_DIRS})
 
 add_definitions(${GTKMM_CFLAGS_OTHER})
 
-add_executable(hh-timer src/main.cpp)
+add_executable(hh-timer src/main.cc src/window.h src/window.cc src/worker.h src/worker.cc)
 target_link_libraries(hh-timer ${GTKMM_LIBRARIES})
