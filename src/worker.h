@@ -10,6 +10,5 @@
 class Worker
 {
 public:
-    void run (Window * window);  /* Основная функция воркера */
-    mutable std::mutex mutex;
+    [[noreturn]] void run (Window * window);  /* Основная функция воркера */
 };

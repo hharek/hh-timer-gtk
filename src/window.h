@@ -2,7 +2,10 @@
 
 #include <gtkmm.h>
 #include <thread>
+#include <string>
+#include <mutex>
 
+#include "timer.h"
 
 /**
  * Основное окно
@@ -16,8 +19,6 @@ public:
     Glib::RefPtr<Gtk::Builder> builder;  /* Ссылка на сборщик */
     Gtk::Label * lbl_time = nullptr;  /* Панель. Время на таймере */
 
-    int second = 0;  /* Текущее время на таймере в секундах */
-
     /* Кнопки */
     Gtk::Box * box_button = nullptr;  /* Коробка с кнопками */
     Gtk::Button * btn_start = nullptr;  /* Старт */
@@ -25,23 +26,17 @@ public:
     Gtk::Button * btn_cancel = nullptr;  /* Отмена */
     Gtk::Button * btn_resume = nullptr;  /* Продолжить */
 
-    /**
-     * Возможные состояния
-     */
-    enum class State
-    {
-        stopped,  /* Остановлен (Старт) */
-        runnable,  /* Запущен (Пауза | Отмена) */
-        paused  /* На паузе (Продолжить | Отмена) */
-    };
-
-    State state = State::stopped;  /* Текущий этап */
+    /* Текущий этап */
+    Timer::State state = Timer::State::stopped;
 
     /* Сигнал «Время сменилось» */
     Glib::Dispatcher signal_time_change;
 
     /* Ссылка на поток */
     std::thread * thread;
+
+    /* Мьютекс для синхронизации */
+    std::mutex mutex;
 
     /* Слоты */
     void btn_start_click();
@@ -54,4 +49,7 @@ public:
 
     /* Сменить время на таймере */
     void slot_time_change () const;
+
+    /* Перевести секунды с формат таймера */
+    static std::string format (int second);
 };

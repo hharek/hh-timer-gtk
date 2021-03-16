@@ -11,5 +11,5 @@ include_directories(${GTKMM_INCLUDE_DIRS})
 link_directories(${GTKMM_LIBRARY_DIRS})
 add_definitions(${GTKMM_CFLAGS_OTHER})
 
-add_executable(hh-timer src/main.cc src/window.h src/window.cc src/worker.h src/worker.cc)
+add_executable(hh-timer src/timer.h src/main.cc src/window.h src/window.cc src/worker.h src/worker.cc)
 target_link_libraries(hh-timer ${CMAKE_THREAD_LIBS_INIT} ${GTKMM_LIBRARIES})

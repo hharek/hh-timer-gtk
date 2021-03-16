@@ -1,5 +1,6 @@
 #include <gtkmm.h>
 #include <thread>
+#include <string>
 
 #include "window.h"
 #include "worker.h"
@@ -38,6 +39,9 @@ Window::Window (BaseObjectType* widget, Glib::RefPtr<Gtk::Builder> & builder) :
        auto worker = new Worker();
        worker->run(this);
     });
+
+    /* Блокируем мьютекс */
+    this->mutex.lock();
 }
 
 /**
@@ -50,7 +54,10 @@ Window::~Window() = default;
  */
 void Window::btn_start_click()
 {
-    this->state = State::runnable;
+    Timer::second = 0;
+    this->state = Timer::State::runnable;
+    this->mutex.unlock();
+
     this->show_button();
 }
 
@@ -59,7 +66,9 @@ void Window::btn_start_click()
  */
 void Window::btn_pause_click()
 {
-    this->state = State::paused;
+    this->state = Timer::State::paused;
+    this->mutex.try_lock();
+
     this->show_button();
 }
 
@@ -68,7 +77,12 @@ void Window::btn_pause_click()
  */
 void Window::btn_cancel_click()
 {
-    this->state = State::stopped;
+    Timer::second = 0;
+    this->signal_time_change.emit();
+
+    this->state = Timer::State::stopped;
+    this->mutex.try_lock();
+
     this->show_button();
 }
 
@@ -77,7 +91,9 @@ void Window::btn_cancel_click()
  */
 void Window::btn_resume_click()
 {
-    this->state = State::runnable;
+    this->state = Timer::State::runnable;
+    this->mutex.unlock();
+
     this->show_button();
 }
 
@@ -93,16 +109,16 @@ void Window::show_button () const
     /* Отображаем в соответствии с состоянием */
     switch (this->state)
     {
-        case State::stopped:
+        case Timer::State::stopped:
             this->box_button->add(* this->btn_start);
             break;
 
-        case State::runnable:
+        case Timer::State::runnable:
             this->box_button->add(* this->btn_pause);
             this->box_button->add(* this->btn_cancel);
             break;
 
-        case State::paused:
+        case Timer::State::paused:
             this->box_button->add(* this->btn_resume);
             this->box_button->add(* this->btn_cancel);
             break;
@@ -115,6 +131,26 @@ void Window::show_button () const
  */
 void Window::slot_time_change () const
 {
-    Glib::ustring str = Glib::ustring::format(this->second);
+    Glib::ustring str = Window::format(Timer::second);
     this->lbl_time->set_label(str);
+}
+
+/**
+ * Перевести секунды с формат таймера
+ */
+std::string Window::format(const int second)
+{
+    std::string hour = std::to_string(second / 3600);
+    if (hour.length() == 1)
+        hour = "0" + hour;
+
+    std::string min = std::to_string((second % 3600) / 60);
+    if (min.length() == 1)
+        min = "0" + min;
+
+    std::string sec = std::to_string(second % 60);
+    if (sec.length() == 1)
+        sec = "0" + sec;
+
+    return hour + ":" + min + ":" + sec;
 }
