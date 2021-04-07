@@ -1,7 +1,9 @@
 #include <gtkmm.h>
 #include <thread>
 #include <string>
+#include <chrono>
 
+#include "timer.h"
 #include "window.h"
 #include "worker.h"
 
@@ -34,7 +36,7 @@ Window::Window (BaseObjectType* widget, Glib::RefPtr<Gtk::Builder> & builder) :
     this->signal_time_change.connect(sigc::mem_fun(*this, &Window::slot_time_change));
 
     /* Запускаем воркер */
-    this->thread = new std::thread([this]
+    new std::thread([this]
     {
        auto worker = new Worker();
        worker->run(this);
@@ -54,8 +56,8 @@ Window::~Window() = default;
  */
 void Window::btn_start_click()
 {
-    Timer::second = 0;
-    this->state = Timer::State::runnable;
+    Timer::state = Timer::State::runnable;
+
     this->mutex.unlock();
 
     this->show_button();
@@ -66,7 +68,11 @@ void Window::btn_start_click()
  */
 void Window::btn_pause_click()
 {
-    this->state = Timer::State::paused;
+    Timer::total += duration_cast<milliseconds>(steady_clock::now() - Timer::timestamp);
+    Timer::timestamp = steady_clock::now();
+
+    Timer::state = Timer::State::paused;
+
     this->mutex.try_lock();
 
     this->show_button();
@@ -77,10 +83,13 @@ void Window::btn_pause_click()
  */
 void Window::btn_cancel_click()
 {
-    Timer::second = 0;
+    Timer::total = 0ms;
+    Timer::timestamp = steady_clock::now();
+
     this->signal_time_change.emit();
 
-    this->state = Timer::State::stopped;
+    Timer::state = Timer::State::stopped;
+
     this->mutex.try_lock();
 
     this->show_button();
@@ -91,7 +100,11 @@ void Window::btn_cancel_click()
  */
 void Window::btn_resume_click()
 {
-    this->state = Timer::State::runnable;
+    Timer::total += duration_cast<milliseconds>(steady_clock::now() - Timer::timestamp);
+    Timer::timestamp = steady_clock::now();
+
+    Timer::state = Timer::State::runnable;
+
     this->mutex.unlock();
 
     this->show_button();
@@ -107,7 +120,7 @@ void Window::show_button () const
         this->box_button->remove(* child);
 
     /* Отображаем в соответствии с состоянием */
-    switch (this->state)
+    switch (Timer::state)
     {
         case Timer::State::stopped:
             this->box_button->add(* this->btn_start);
@@ -131,26 +144,31 @@ void Window::show_button () const
  */
 void Window::slot_time_change () const
 {
-    Glib::ustring str = Window::format(Timer::second);
+    Timer::total += duration_cast<milliseconds>(steady_clock::now() - Timer::timestamp);
+    Timer::timestamp = steady_clock::now();
+
+    Glib::ustring str = Window::format(Timer::total.count());
     this->lbl_time->set_label(str);
 }
 
 /**
  * Перевести секунды с формат таймера
  */
-std::string Window::format(const int second)
+std::string Window::format(const int total)
 {
-    std::string hour = std::to_string(second / 3600);
-    if (hour.length() == 1)
-        hour = "0" + hour;
+    int second = total / 1000;
 
-    std::string min = std::to_string((second % 3600) / 60);
-    if (min.length() == 1)
-        min = "0" + min;
+    char hour[3] = {0};
+    snprintf(hour, 3, "%02d", second / 3600);
 
-    std::string sec = std::to_string(second % 60);
-    if (sec.length() == 1)
-        sec = "0" + sec;
+    char min[3] = {0};
+    snprintf(min, 3, "%02d", (second % 3600) / 60);
 
-    return hour + ":" + min + ":" + sec;
+    char sec[3] = {0};
+    snprintf(sec, 3, "%02d", second % 60);
+
+    char ms[4] = {0};
+    snprintf(ms, 4, "%03d", total % 1000);
+
+    return std::string(hour) + ":" + std::string(min) + ":" + std::string(sec) + "." + std::string(ms);
 }

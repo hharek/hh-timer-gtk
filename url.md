@@ -11,3 +11,6 @@ https://gitlab.gnome.org/GNOME/gtkmm-documentation/-/tree/gtkmm-3-24/examples/bo
 ### Таймер
 https://developer.gnome.org/gtkmm-tutorial/stable/sec-timeouts.html.en
 https://stackoverflow.com/questions/8352027/gtk-timer-how-to-make-a-timer-within-a-frame
+
+### Время
+https://habr.com/ru/post/324984/

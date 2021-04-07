@@ -26,14 +26,8 @@ public:
     Gtk::Button * btn_cancel = nullptr;  /* Отмена */
     Gtk::Button * btn_resume = nullptr;  /* Продолжить */
 
-    /* Текущий этап */
-    Timer::State state = Timer::State::stopped;
-
     /* Сигнал «Время сменилось» */
     Glib::Dispatcher signal_time_change;
-
-    /* Ссылка на поток */
-    std::thread * thread;
 
     /* Мьютекс для синхронизации */
     std::mutex mutex;

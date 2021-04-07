@@ -18,13 +18,11 @@ using namespace std::chrono;
             std::lock_guard<std::mutex> lock(window->mutex);
         }
 
-        std::this_thread::sleep_for(1s);
+        std::this_thread::sleep_for(111ms);
 
+        if (Timer::state == Timer::State::runnable)
         {
-            std::lock_guard<std::mutex> lock(window->mutex);
-            Timer::second += 1;
+            window->signal_time_change.emit();
         }
-
-        window->signal_time_change.emit();
     }
 }

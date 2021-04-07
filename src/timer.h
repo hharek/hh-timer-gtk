@@ -20,6 +20,14 @@ public:
         paused  /* На паузе (Продолжить | Отмена) */
     };
 
-    /* Текущее время на таймере в секундах */
-    static int second;
+    /**
+     * Текущее состояние
+     */
+    static State state;
+
+    /* Последняя временная метка */
+    static steady_clock::time_point timestamp;
+
+    /* Текущее время на таймере в милисекундах */
+    static milliseconds total;
 };
