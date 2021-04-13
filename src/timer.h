@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <mutex>
 
 using namespace std::chrono;
 
@@ -20,14 +21,24 @@ public:
         paused  /* На паузе (Продолжить | Отмена) */
     };
 
-    /**
-     * Текущее состояние
-     */
-    static State state;
+    /* Текущее состояние */
+    State state = Timer::State::stopped;
 
     /* Последняя временная метка */
-    static steady_clock::time_point timestamp;
+    steady_clock::time_point timestamp = steady_clock::now();
 
-    /* Текущее время на таймере в милисекундах */
-    static milliseconds total;
+    /* Текущее время на таймере в миллисекундах */
+    milliseconds total = { 0ms };
+
+    /* Мьютекс для управления воркером */
+    std::mutex mutex;
+
+    /* Показывать миллисекунды */
+    bool settings_milliseconds_show = true;
+
+    /* Основные функции */
+    void start ();
+    void pause ();
+    void resume();
+    void cancel ();
 };

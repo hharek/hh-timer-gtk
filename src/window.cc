@@ -15,8 +15,14 @@ Window::Window (BaseObjectType* widget, Glib::RefPtr<Gtk::Builder> & builder) :
     builder(builder),
     signal_time_change()
 {
+    this->timer = new Timer();
+
     /* Окно */
     builder->get_widget("lbl-time", this->lbl_time);
+    if (this->timer->settings_milliseconds_show)
+        this->lbl_time->set_label("00:00:00.000");
+    else
+        this->lbl_time->set_label("00:00:00");
 
     /* Отмечаем кнопки и вешаем на них функции */
     builder->get_widget("box-button", this->box_button);
@@ -41,9 +47,6 @@ Window::Window (BaseObjectType* widget, Glib::RefPtr<Gtk::Builder> & builder) :
        auto worker = new Worker();
        worker->run(this);
     });
-
-    /* Блокируем мьютекс */
-    this->mutex.lock();
 }
 
 /**
@@ -54,59 +57,40 @@ Window::~Window() = default;
 /**
  * Нажатие на Старт
  */
-void Window::btn_start_click()
+void Window::btn_start_click() const
 {
-    Timer::state = Timer::State::runnable;
-
-    this->mutex.unlock();
-
+    this->timer->start();
+    this->slot_time_change();
     this->show_button();
 }
 
 /**
  * Нажатие на Пауза
  */
-void Window::btn_pause_click()
+void Window::btn_pause_click() const
 {
-    Timer::total += duration_cast<milliseconds>(steady_clock::now() - Timer::timestamp);
-    Timer::timestamp = steady_clock::now();
-
-    Timer::state = Timer::State::paused;
-
-    this->mutex.try_lock();
-
+    this->timer->pause();
+    this->slot_time_change();
     this->show_button();
 }
 
 /**
  * Нажатие на Отмена
  */
-void Window::btn_cancel_click()
+void Window::btn_cancel_click() const
 {
-    Timer::total = 0ms;
-    Timer::timestamp = steady_clock::now();
-
-    this->signal_time_change.emit();
-
-    Timer::state = Timer::State::stopped;
-
-    this->mutex.try_lock();
-
+    this->timer->cancel();
+    this->slot_time_change();
     this->show_button();
 }
 
 /**
  * Нажатие на Продолжить
  */
-void Window::btn_resume_click()
+void Window::btn_resume_click() const
 {
-    Timer::total += duration_cast<milliseconds>(steady_clock::now() - Timer::timestamp);
-    Timer::timestamp = steady_clock::now();
-
-    Timer::state = Timer::State::runnable;
-
-    this->mutex.unlock();
-
+    this->timer->resume();
+    this->slot_time_change();
     this->show_button();
 }
 
@@ -120,7 +104,7 @@ void Window::show_button () const
         this->box_button->remove(* child);
 
     /* Отображаем в соответствии с состоянием */
-    switch (Timer::state)
+    switch (this->timer->state)
     {
         case Timer::State::stopped:
             this->box_button->add(* this->btn_start);
@@ -144,17 +128,20 @@ void Window::show_button () const
  */
 void Window::slot_time_change () const
 {
-    Timer::total += duration_cast<milliseconds>(steady_clock::now() - Timer::timestamp);
-    Timer::timestamp = steady_clock::now();
+    milliseconds total;
+    if (this->timer->state == Timer::State::runnable)
+        total = this->timer->total + (duration_cast<milliseconds>(steady_clock::now() - this->timer->timestamp));
+    else
+        total = this->timer->total;
 
-    Glib::ustring str = Window::format(Timer::total.count());
+    Glib::ustring str = Window::format(total.count(), this->timer->settings_milliseconds_show);
     this->lbl_time->set_label(str);
 }
 
 /**
  * Перевести секунды с формат таймера
  */
-std::string Window::format(const int total)
+std::string Window::format(const int total, const bool milliseconds_show)
 {
     int second = total / 1000;
 
@@ -167,8 +154,14 @@ std::string Window::format(const int total)
     char sec[3] = {0};
     snprintf(sec, 3, "%02d", second % 60);
 
-    char ms[4] = {0};
-    snprintf(ms, 4, "%03d", total % 1000);
+    std::string total_str = std::string(hour) + ":" + std::string(min) + ":" + std::string(sec);
 
-    return std::string(hour) + ":" + std::string(min) + ":" + std::string(sec) + "." + std::string(ms);
+    if (milliseconds_show)
+    {
+        char ms[4] = {0};
+        snprintf(ms, 4, "%03d", total % 1000);
+        total_str += "." + std::string(ms);
+    }
+
+    return total_str;
 }

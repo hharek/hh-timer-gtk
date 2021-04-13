@@ -15,12 +15,12 @@ using namespace std::chrono;
     while (true)
     {
         {
-            std::lock_guard<std::mutex> lock(window->mutex);
+            std::lock_guard<std::mutex> lock(window->timer->mutex);
         }
 
         std::this_thread::sleep_for(111ms);
 
-        if (Timer::state == Timer::State::runnable)
+        if (window->timer->state == Timer::State::runnable)
         {
             window->signal_time_change.emit();
         }

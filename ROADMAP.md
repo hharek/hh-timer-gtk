@@ -1,8 +1,3 @@
-- Добавить unit-тесты. cppunit
-- Разобраться с RAII
-    - using(){}
-    - unique_ptr
-- Разобраться с mutex 
-    - std::mutex
-    - std::lock_guard
-- Единные правила именования
+- Секундомер переделать в таймер
+- GtkLabel переделать в input[text]
+- Реализовать без воркера через Glib::SignalTimeout

@@ -1,15 +1,5 @@
 #include <gtkmm.h>
-#include <chrono>
-
-#include "timer.h"
 #include "window.h"
-
-/* Инициализируем статические переменные */
-using namespace std::chrono;
-
-steady_clock::time_point Timer::timestamp = steady_clock::now();
-milliseconds Timer::total = {0ms};
-Timer::State Timer::state = Timer::State::stopped;
 
 /**
  * main

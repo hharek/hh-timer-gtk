@@ -29,14 +29,14 @@ public:
     /* Сигнал «Время сменилось» */
     Glib::Dispatcher signal_time_change;
 
-    /* Мьютекс для синхронизации */
-    std::mutex mutex;
+    /* Ссылка на таймер */
+    Timer * timer;
 
     /* Слоты */
-    void btn_start_click();
-    void btn_pause_click();
-    void btn_cancel_click();
-    void btn_resume_click();
+    void btn_start_click() const;
+    void btn_pause_click() const;
+    void btn_cancel_click() const;
+    void btn_resume_click() const;
 
     /* Отобразить кнопки */
     void show_button() const;
@@ -45,5 +45,5 @@ public:
     void slot_time_change () const;
 
     /* Перевести секунды с формат таймера */
-    static std::string format (int second);
+    static std::string format (int total, bool milliseconds_show);
 };

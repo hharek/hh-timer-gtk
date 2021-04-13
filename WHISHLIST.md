@@ -6,7 +6,11 @@
     - Откуда взялись параметры ${GTK3_INCLUDE_DIRS} ${GTK3_LIBRARY_DIRS} ${GTK3_CFLAGS_OTHER}
     - Нужно ли использовать FindGTK2, FindGTK
 - Найти иконку для таймера
-- Пройти обучение по gtkmm 
-    - https://developer.gnome.org/gtkmm-tutorial/
-- Пройти обучение по GTK+ 
-    - https://developer.gnome.org/gtk3/3.24/gtk-getting-started.html
+- Добавить unit-тесты. cppunit
+- Разобраться с RAII
+  - using(){}
+  - unique_ptr
+- Разобраться с mutex
+  - std::mutex
+  - std::lock_guard
+- Единные правила именования
