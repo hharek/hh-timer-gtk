@@ -13,6 +13,3 @@ add_definitions(${GTKMM_CFLAGS_OTHER})
 
 add_executable(hh-timer src/timer.h src/timer.cc src/main.cc src/window.h src/window.cc src/worker.h src/worker.cc)
 target_link_libraries(hh-timer ${CMAKE_THREAD_LIBS_INIT} ${GTKMM_LIBRARIES})
-
-add_executable(hh-timer-test test/main.cc)
-target_link_libraries(hh-timer-test ${CMAKE_THREAD_LIBS_INIT} ${GTKMM_LIBRARIES})
