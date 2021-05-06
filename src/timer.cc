@@ -1,5 +1,4 @@
 #include "timer.h"
-#include "chrono"
 
 using namespace std::chrono;
 
@@ -12,8 +11,6 @@ void Timer::start()
 
     this->timestamp = steady_clock::now();
     this->total = { 0ms };
-
-    this->mutex.unlock();
 }
 
 /**
@@ -21,8 +18,6 @@ void Timer::start()
  */
 void Timer::pause()
 {
-    this->mutex.try_lock();
-
     this->state = Timer::State::paused;
 
     this->total += duration_cast<milliseconds>(steady_clock::now() - this->timestamp);
@@ -36,8 +31,6 @@ void Timer::resume()
     this->state = Timer::State::runnable;
 
     this->timestamp = steady_clock::now();
-
-    this->mutex.unlock();
 }
 
 /**
@@ -45,8 +38,6 @@ void Timer::resume()
  */
 void Timer::cancel()
 {
-    this->mutex.try_lock();
-
     this->state = Timer::State::stopped;
 
     this->total = { 0ms };

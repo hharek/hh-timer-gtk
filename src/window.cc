@@ -1,19 +1,14 @@
 #include <gtkmm.h>
-#include <thread>
-#include <string>
-#include <chrono>
 
 #include "timer.h"
 #include "window.h"
-#include "worker.h"
 
 /**
  * Конструктор
  */
 Window::Window (BaseObjectType* widget, Glib::RefPtr<Gtk::Builder> & builder) :
     Gtk::Window(widget),
-    builder(builder),
-    signal_time_change()
+    builder(builder)
 {
     this->timer = new Timer();
 
@@ -37,16 +32,6 @@ Window::Window (BaseObjectType* widget, Glib::RefPtr<Gtk::Builder> & builder) :
 
     /* Показать кнопки */
     this->show_button();
-
-    /* Подписываемся на сигнал «signal_time_change» */
-    this->signal_time_change.connect(sigc::mem_fun(*this, &Window::slot_time_change));
-
-    /* Запускаем воркер */
-    new std::thread([this]
-    {
-       auto worker = new Worker();
-       worker->run(this);
-    });
 }
 
 /**
@@ -57,40 +42,48 @@ Window::~Window() = default;
 /**
  * Нажатие на Старт
  */
-void Window::btn_start_click() const
+void Window::btn_start_click()
 {
+    this->timeout_conn = Glib::signal_timeout().connect(sigc::mem_fun(*this, &Window::time_change), this->timer->timeout_interval);
+
     this->timer->start();
-    this->slot_time_change();
+    this->time_change();
     this->show_button();
 }
 
 /**
  * Нажатие на Пауза
  */
-void Window::btn_pause_click() const
+void Window::btn_pause_click()
 {
+    this->timeout_conn.disconnect();
+
     this->timer->pause();
-    this->slot_time_change();
+    this->time_change();
     this->show_button();
 }
 
 /**
  * Нажатие на Отмена
  */
-void Window::btn_cancel_click() const
+void Window::btn_cancel_click()
 {
+    this->timeout_conn.disconnect();
+
     this->timer->cancel();
-    this->slot_time_change();
+    this->time_change();
     this->show_button();
 }
 
 /**
  * Нажатие на Продолжить
  */
-void Window::btn_resume_click() const
+void Window::btn_resume_click()
 {
+    this->timeout_conn = Glib::signal_timeout().connect(sigc::mem_fun(*this, &Window::time_change), this->timer->timeout_interval);
+
     this->timer->resume();
-    this->slot_time_change();
+    this->time_change();
     this->show_button();
 }
 
@@ -124,9 +117,9 @@ void Window::show_button () const
 }
 
 /**
- * Сменить время на таймере
+ * Сменить время
  */
-void Window::slot_time_change () const
+bool Window::time_change () const
 {
     milliseconds total;
     if (this->timer->state == Timer::State::runnable)
@@ -134,8 +127,10 @@ void Window::slot_time_change () const
     else
         total = this->timer->total;
 
-    Glib::ustring str = Window::format(total.count(), this->timer->settings_milliseconds_show);
+    Glib::ustring str = Window::format((int)total.count(), this->timer->settings_milliseconds_show);
     this->lbl_time->set_label(str);
+
+    return true;
 }
 
 /**

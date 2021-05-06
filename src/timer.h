@@ -1,7 +1,6 @@
 #pragma once
 
 #include <chrono>
-#include <mutex>
 
 using namespace std::chrono;
 
@@ -30,11 +29,11 @@ public:
     /* Текущее время на таймере в миллисекундах */
     milliseconds total = { 0ms };
 
-    /* Мьютекс для управления воркером */
-    std::mutex mutex;
-
     /* Показывать миллисекунды */
     bool settings_milliseconds_show = true;
+
+    /* Интервал таймаута в миллисекундах */
+    unsigned int timeout_interval = 111;
 
     /* Основные функции */
     void start ();
